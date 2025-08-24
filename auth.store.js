@@ -1,0 +1,1 @@
+import{w as a}from"./index.iQGNPith.js";const t=a(null),r=s=>{t.set(s)},n=s=>{t.update(e=>({...e,walletAddress:s}))},l=s=>{t.update(e=>({...e,referrerTelegramId:s}))},c=s=>{t.update(e=>({...e,nftCount:s}))},u=()=>{t.set(null)};export{l as a,c as b,u as c,n as d,r as s,t as u};
