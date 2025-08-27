@@ -144,15 +144,13 @@ class FallbackFootballTrader:
         except Exception as e:
             print(f"⚠️ Ошибка получения nonce: {e}")
         
-        # Fallback: Используем базовый nonce с инкрементом
-        base_nonce = "0x198eba23566"  # Базовая часть из успешных примеров
-        increment = int(time.time()) % 1000  # Простой инкремент на основе времени
+        # Fallback: Используем простые инкрементальные nonce
+        # Это безопаснее чем сложные hex значения
+        current_time = int(time.time())
+        simple_nonce = hex(current_time % 10000)  # Простое число от 0x0 до 0x270f
         
-        # Формируем nonce в формате как в успешных примерах
-        fallback_nonce = f"{base_nonce}{increment:016x}"
-        
-        print(f"🔄 Используем fallback nonce: {fallback_nonce}")
-        return fallback_nonce
+        print(f"🔄 Используем простой nonce: {simple_nonce}")
+        return simple_nonce
 
     def get_gas_prices(self) -> Dict:
         """Получение цен на газ с fallback"""
