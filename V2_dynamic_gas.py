@@ -119,6 +119,8 @@ class FootballTrader:
         
         blockchain_nonce = result["result"]
         
+        print(f"📋 Сырой ответ EntryPoint: {blockchain_nonce}")
+        
         # Форматируем nonce правильно
         if blockchain_nonce and blockchain_nonce != "0x":
             nonce_int = int(blockchain_nonce, 16)
@@ -127,6 +129,7 @@ class FootballTrader:
             formatted_nonce = "0x0"
         
         print(f"✅ Blockchain nonce: {formatted_nonce}")
+        print(f"   Nonce как int: {int(formatted_nonce, 16)}")
         return formatted_nonce
 
     def build_calldata(self, player_id: int, max_gold_wei: int, signature: str, nonce: int, deadline: int) -> str:
@@ -184,20 +187,21 @@ class FootballTrader:
         """Преобразование подписи в формат Account Abstraction"""
         print("🔧 Форматируем подпись для AA...")
         
-        # Используем успешную подпись из curl запросов
-        # Эта подпись работает для данного кошелька
-        successful_signature = "e16e7eb2993dc27c115a730cd3adaec7f856889bdcc27afaee492201fbe46cd2588a999ec07a75a1222832a123a46eeec37c33903ee53f529fa1496ae836a3201b"
+        # Убираем 0x префикс если есть
+        clean_signature = api_signature.replace("0x", "")
         
-        # Создаем AA подпись точно как в успешном curl
+        print(f"   API подпись: {clean_signature[:20]}...")
+        print(f"   Длина подписи: {len(clean_signature)} символов")
+        
+        # Создаем AA подпись с динамической подписью из API
         aa_signature = "0x0000000000000000000000000000000000000000000000000000000000000020"
         aa_signature += "0000000000000000000000000000000000000000000000000000000000000000"
         aa_signature += "0000000000000000000000000000000000000000000000000000000000000040"
         aa_signature += "0000000000000000000000000000000000000000000000000000000000000041"
-        aa_signature += successful_signature
+        aa_signature += clean_signature
         aa_signature += "00000000000000000000000000000000000000000000000000000000000000"
         
         print(f"✅ Подпись отформатирована: {len(aa_signature)} символов")
-        print(f"   Используем проверенную подпись: {successful_signature[:20]}...")
         return aa_signature
 
     def get_current_gas_prices(self) -> Dict:
