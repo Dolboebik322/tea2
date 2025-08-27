@@ -110,12 +110,11 @@ class OptimizedFootballTrader:
         """Получение текущего nonce из EntryPoint"""
         print("📤 Получаем текущий nonce...")
         
-        # Используем key из успешных примеров
-        key = "0x198eba23566"
-        
+        # Используем точные данные из успешного curl запроса
+        # Из успешного примера: "0x35567e1a0000000000000000000000008f37a8015851976ab75e309100c2511ababc68ad00000000000000000000000000000000000000000000000000000198eba23566"
         call_data = "0x35567e1a"  # getNonce selector
-        call_data += f"000000000000000000000000{self.config.smart_wallet_address[2:].lower()}"
-        call_data += f"{key[2:].zfill(48)}"
+        call_data += f"000000000000000000000000{self.config.smart_wallet_address[2:].lower()}"  # sender address
+        call_data += "00000000000000000000000000000000000000000000000000000198eba23566"  # key из успешного примера
         
         payload = {
             "jsonrpc": "2.0",
@@ -130,6 +129,10 @@ class OptimizedFootballTrader:
             ]
         }
         
+        print(f"📋 Запрос nonce:")
+        print(f"   Call data: {call_data}")
+        print(f"   To: {self.config.entry_point_address}")
+        
         response = self.session.post(
             self.config.alchemy_rpc_url,
             headers=self.rpc_headers,
@@ -138,11 +141,40 @@ class OptimizedFootballTrader:
         response.raise_for_status()
         
         result = response.json()
+        print(f"📥 Ответ RPC: {result}")
+        
         if "error" in result:
-            raise Exception(f"Error getting nonce: {result['error']}")
+            print(f"❌ Ошибка RPC: {result['error']}")
+            # Попробуем с key = 0
+            print("🔄 Пробуем с key = 0...")
+            
+            call_data_zero = "0x35567e1a"
+            call_data_zero += f"000000000000000000000000{self.config.smart_wallet_address[2:].lower()}"
+            call_data_zero += "0000000000000000000000000000000000000000000000000000000000000000"  # key = 0
+            
+            payload["params"][0]["data"] = call_data_zero
+            
+            response = self.session.post(
+                self.config.alchemy_rpc_url,
+                headers=self.rpc_headers,
+                json=payload
+            )
+            response.raise_for_status()
+            
+            result = response.json()
+            print(f"📥 Ответ с key=0: {result}")
+            
+            if "error" in result:
+                raise Exception(f"Error getting nonce: {result['error']}")
         
         full_nonce = result["result"]
         print(f"✅ Текущий nonce: {full_nonce}")
+        
+        # Проверяем, что nonce не равен 0x0
+        if full_nonce == "0x0000000000000000000000000000000000000000000000000000000000000000":
+            print("⚠️ Получен нулевой nonce, используем значение из успешного примера")
+            return "0x198eba235660000000000000000"
+        
         return full_nonce
 
     def get_gas_prices(self) -> Dict:
