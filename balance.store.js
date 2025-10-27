@@ -1,0 +1,1 @@
+import{w as t}from"./index.iQGNPith.js";const n=t({balance:0}),r=()=>n,s=a=>{n.update(e=>({balance:e.balance+a}))},l=a=>{n.update(e=>({balance:a}))},o=a=>{n.update(e=>({balance:e.balance-a}))};export{o as d,r as g,s as i,l as s};
